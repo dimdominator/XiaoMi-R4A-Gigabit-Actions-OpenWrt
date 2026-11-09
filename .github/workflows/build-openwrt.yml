@@ -49,20 +49,8 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git clone --depth 1 --single-branch $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-
-    - name: Revise mt7621_xiaomi_mi-router-4a-3g-v2.dtsi
-      run: |
-        if [ -f "mt7621_xiaomi_mi-router-4a-3g-v2.dtsi" ]; then
-          cp -f mt7621_xiaomi_mi-router-4a-3g-v2.dtsi openwrt/target/linux/ramips/dts/mt7621_xiaomi_mi-router-4a-3g-v2.dtsi
-        fi
-
-    - name: Revise mt7621.mk
-      run: |
-        if [ -f "mt7621.mk" ]; then
-          cp -f mt7621.mk openwrt/target/linux/ramips/image/mt7621.mk
-        fi
 
     - name: Load custom feeds
       run: |
@@ -89,12 +77,7 @@ jobs:
       id: package
       run: |
         cd openwrt
-        sed -i 's/kmod-mtk-hnat//g' target/linux/ramips/Makefile
-        sed -i 's/kmod-mtk-hnat//g' target/linux/ramips/mt7621/target.mk
-        sed -i 's/kmod-mtk-hnat//g' target/linux/ramips/image/mt7621.mk
-        echo "# CONFIG_PACKAGE_kmod-mtk-hnat is not set" >> .config
         make defconfig
-        sed -i 's/CONFIG_PACKAGE_kmod-mtk-hnat=y/# CONFIG_PACKAGE_kmod-mtk-hnat is not set/g' .config
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
