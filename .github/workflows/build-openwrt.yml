@@ -89,7 +89,12 @@ jobs:
       id: package
       run: |
         cd openwrt
+        sed -i 's/kmod-mtk-hnat//g' target/linux/ramips/Makefile
+        sed -i 's/kmod-mtk-hnat//g' target/linux/ramips/mt7621/target.mk
+        sed -i 's/kmod-mtk-hnat//g' target/linux/ramips/image/mt7621.mk
+        echo "# CONFIG_PACKAGE_kmod-mtk-hnat is not set" >> .config
         make defconfig
+        sed -i 's/CONFIG_PACKAGE_kmod-mtk-hnat=y/# CONFIG_PACKAGE_kmod-mtk-hnat is not set/g' .config
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
