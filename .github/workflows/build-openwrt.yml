@@ -77,7 +77,13 @@ jobs:
       id: package
       run: |
         cd openwrt
+        # ЖЕСТКО ВЫРЕЗАЕМ СЛОМАННЫЙ ДРАЙВЕР ИЗ СИСТЕМНЫХ ФАЙЛОВ ЯДРА
+        sed -i '/kmod-mtk-hnat/d' target/linux/ramips/Makefile || true
+        sed -i '/kmod-mtk-hnat/d' target/linux/ramips/mt7621/target.mk || true
+        find target/linux/ramips/image/ -type f -exec sed -i '/kmod-mtk-hnat/d' {} + || true
+        echo "# CONFIG_PACKAGE_kmod-mtk-hnat is not set" >> .config
         make defconfig
+        sed -i 's/CONFIG_PACKAGE_kmod-mtk-hnat=y/# CONFIG_PACKAGE_kmod-mtk-hnat is not set/g' .config
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
